@@ -1,0 +1,32 @@
+// Define the region of interest (Bangladesh)
+var roi = ee.Geometry.Polygon([
+  [[88.025, 20.745], [88.025, 26.641], [92.681, 26.641], [92.681, 20.745], [88.025, 20.745]]
+]);
+
+// Load the ALOS World 3D - 30m dataset
+var aw3d30 = ee.ImageCollection('JAXA/ALOS/AW3D30/V3_2');
+
+// Filter the collection by the region of interest
+var filtered = aw3d30.filterBounds(roi);
+
+// Filter using median method
+var image = filtered.median();
+
+// Select the elevation band
+var elevation = image.select('DSM');
+
+// Visualize the DEM
+var elevationParams = {min: 0, max: 1000}; // Adjust the visualization parameters as needed
+Map.addLayer(elevation, elevationParams, 'ALOS World 3D - 30m Elevation');
+
+// Clip the DEM to the region of interest
+var elevationROI = elevation.clip(roi);
+
+// Export the DEM as a GeoTIFF file
+Export.image.toDrive({
+  image: elevationROI,
+  description: 'ALOS_World3D_30m_Bangladesh',
+  scale: 30, // Adjust the scale according to your needs
+  region: roi,
+  maxPixels: 1000000000
+});

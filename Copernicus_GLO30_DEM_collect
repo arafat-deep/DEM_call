@@ -1,0 +1,21 @@
+// Define the region of interest (Bangladesh)
+var roi = ee.Geometry.Polygon([
+  [[88.025, 20.745], [88.025, 26.641], [92.681, 26.641], [92.681, 20.745], [88.025, 20.745]]
+]);
+
+// Apply the terrain correction
+var dem = ee.ImageCollection('COPERNICUS/DEM/GLO30').mosaic().clip(roi); // Use Copernicus DEM
+var elevation = dem.select('DEM'); // Select the DEM band
+
+// Visualize the DEM
+var demParams = {min: 0, max: 1000}; // Adjust the visualization parameters as needed
+Map.addLayer(elevation, demParams, 'DEM');
+
+// Export the DEM as a GeoTIFF file
+Export.image.toDrive({
+  image: elevation,
+  description: 'DEM_Bangladesh',
+  scale: 30, // Adjust the scale according to your needs
+  region: roi,
+  maxPixels: 10000000000
+});
